@@ -19,21 +19,18 @@ for i in range(9):
 
 
         model = Sequential()
-        model.add(Dense(32, activation='relu', input_dim= X_train.shape[1]))
-
+        model.add(Dense(X_train.shape[1], activation='relu', input_dim= X_train.shape[1]))
         model.add(Dropout(rate=0.1 + i*0.1))
         model.add(Dense(1, activation='sigmoid'))
 
 
         es = EarlyStopping(monitor='val_loss', mode ='min', verbose = 0,min_delta=0.02, patience=100, restore_best_weights=True)
-        #model.add(Bidirectional(LSTM(50, input_shape=(278,1))))
-        #model.add(Dense(1, activation='sigmoid'))
 
-        opt = keras.optimizers.Adam(learning_rate=0.0001)
+        #opt = keras.optimizers.Adam(learning_rate=0.0001)
 
         model.compile(
             loss = 'binary_crossentropy',
-            optimizer=opt,
+            optimizer='adam',
             metrics=['accuracy']
         )
 

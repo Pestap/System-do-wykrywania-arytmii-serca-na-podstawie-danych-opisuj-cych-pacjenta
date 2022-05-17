@@ -53,29 +53,41 @@ def prepareData(filename):
 
     dataset = df.to_numpy()
     #usuwamy 13 kolumne - większość rekordów nie posiada wartości
-    dataset = np.delete(dataset, 13, 1)
+    cols_to_delete = [13]
+    #oznaczmy jako do usunięcia kolumnny, które we wszytkich mają 0
+    t_dataset = np.transpose(dataset)
+
+    for col_idx, col in enumerate(t_dataset):
+        amount_of_zeros_or_undefined =0
+        for val in col:
+            if val == 0 or val == '?':
+                amount_of_zeros_or_undefined += 1
+        if amount_of_zeros_or_undefined/len(col) >= 0.95:
+            cols_to_delete.append(col_idx)
+
+
+
+
+    dataset = np.delete(dataset, cols_to_delete, 1)
 
     #usuwamy rekordy nieposiadjace plenych atrybutow
     #rows_to_delete = []
+
     for idx, row in enumerate(dataset):
         for val_idx, val in enumerate(row):
             if val == '?':
                 dataset[idx][val_idx] = column_average(dataset, val_idx)
 
-    #dataset = np.delete(dataset, rows_to_delete, 0)
-
     dataset = dataset.astype(float)
 
-    training_set_size = int(0.8 * dataset.shape[0])
+    training_set_size = int(0.84 * dataset.shape[0])
     test_set_size = np.shape(dataset)[0] - training_set_size
 
-    #losujemy zbiór testowy i treningowy: proporcje 20 : 80
+    #losujemy zbiór testowy i treningowy: proporcje 16 : 84
     training_set_indexes = np.random.choice(dataset.shape[0], size=training_set_size, replace=False)
     all_indexes = [ x for x in range(dataset.shape[0])]
     test_set_indexes = np.setdiff1d(all_indexes, training_set_indexes)
 
-    #training_set_indexes.sort()
-    #test_set_indexes.sort()
 
     training_set = dataset[training_set_indexes,:]
     test_set = dataset[test_set_indexes, :]
