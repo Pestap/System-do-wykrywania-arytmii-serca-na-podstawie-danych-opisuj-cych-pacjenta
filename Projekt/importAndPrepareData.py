@@ -1,11 +1,52 @@
 import pandas as pd
 import numpy as np
 
+from sklearn.preprocessing import StandardScaler
+
 def importData(filename):
     #import z pliku z danymi z folderu Data
     df = pd.read_csv("Data/" + filename, header=None)
     return df
 
+def column_average(dataset, column_index):
+    column = dataset[:, column_index]
+    sum = 0
+    count = column.shape[0]
+
+    for val in column:
+        if val != '?':
+            sum += int(val)
+        else:
+            count -= 1
+
+    return sum/count
+
+
+def find_max_in_column(column):
+    max_idx = 0
+    max_val = abs(column[0])
+
+    for val in column:
+        if val > max_val:
+            max_val = val
+
+    return max_val
+
+
+def normalize_dataset(dataset):
+    maximum_values = np.amax(np.abs(dataset), axis=0)
+    means = np.mean(dataset, axis=0)
+    std = np.std(dataset, axis=0)
+
+    normalization_result = np.zeros(dataset.shape)
+
+    for row_idx, row in enumerate(dataset):
+        for val_idx, val in enumerate(row):
+            normalization_result[row_idx][val_idx] = (dataset[row_idx][val_idx] - means[val_idx])/std[val_idx]
+
+
+
+    return normalization_result
 
 def prepareData(filename):
     df = importData(filename)
@@ -15,12 +56,13 @@ def prepareData(filename):
     dataset = np.delete(dataset, 13, 1)
 
     #usuwamy rekordy nieposiadjace plenych atrybutow
-    rows_to_delete = []
+    #rows_to_delete = []
     for idx, row in enumerate(dataset):
-        if '?' in row:
-            rows_to_delete.append(idx)
+        for val_idx, val in enumerate(row):
+            if val == '?':
+                dataset[idx][val_idx] = column_average(dataset, val_idx)
 
-    dataset = np.delete(dataset, rows_to_delete, 0)
+    #dataset = np.delete(dataset, rows_to_delete, 0)
 
     dataset = dataset.astype(float)
 
@@ -39,6 +81,7 @@ def prepareData(filename):
     test_set = dataset[test_set_indexes, :]
 
 
+    #scaler = StandardScaler()
     #dzielimy na zbiór x i y
 
     training_set_Y = training_set[:,-1]
@@ -58,6 +101,23 @@ def prepareData(filename):
 
     training_set = np.delete(training_set, -1, 1)
     test_set = np.delete(test_set, -1, 1)
+
+    #training_set = normalize_dataset(training_set)
+    #test_set=normalize_dataset(test_set)
+
+
+    scaler = StandardScaler()
+
+
+    scaler.fit(training_set)
+
+
+    training_set = scaler.transform(training_set)
+    test_set = scaler.transform(test_set)
+
+
+    #Normalizacja danych
+
 
     return (training_set, training_set_Y),(test_set, test_set_Y)
 
