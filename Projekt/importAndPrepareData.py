@@ -58,14 +58,19 @@ def prepareData(filename):
     t_dataset = np.transpose(dataset)
 
     for col_idx, col in enumerate(t_dataset):
-        amount_of_zeros_or_undefined =0
+        amount_of_zeros =0
         for val in col:
-            if val == 0 or val == '?':
-                amount_of_zeros_or_undefined += 1
-        if amount_of_zeros_or_undefined/len(col) >= 0.95:
+            if val == 0:
+                amount_of_zeros += 1
+            if val == '?':
+                cols_to_delete.append(col_idx)
+                break
+        if amount_of_zeros/len(col) >= 0.95:
             cols_to_delete.append(col_idx)
 
-
+    #pozbywamy się ewentualnych duplikatów
+    cols_to_delete = set(cols_to_delete)
+    cols_to_delete = list(cols_to_delete)
 
 
     dataset = np.delete(dataset, cols_to_delete, 1)
@@ -83,7 +88,7 @@ def prepareData(filename):
     training_set_size = int(0.84 * dataset.shape[0])
     test_set_size = np.shape(dataset)[0] - training_set_size
 
-    #losujemy zbiór testowy i treningowy: proporcje 16 : 84
+    #losujemy zbiór testowy i treningowy: proporcje 16: 84
     training_set_indexes = np.random.choice(dataset.shape[0], size=training_set_size, replace=False)
     all_indexes = [ x for x in range(dataset.shape[0])]
     test_set_indexes = np.setdiff1d(all_indexes, training_set_indexes)

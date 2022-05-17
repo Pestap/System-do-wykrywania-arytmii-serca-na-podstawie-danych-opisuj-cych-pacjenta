@@ -13,14 +13,14 @@ droputRates = []
 
 for i in range(9):
     scoresForDropout = []
-    for j in range(10):
+    for j in range(30):
         (X_train, Y_train), (X_test, Y_test) = prepareData("arrhythmia.data")
 
 
 
         model = Sequential()
         model.add(Dense(X_train.shape[1], activation='relu', input_dim= X_train.shape[1]))
-        model.add(Dropout(rate=0.1 + i*0.1))
+        model.add(Dropout(rate=0.6))
         model.add(Dense(1, activation='sigmoid'))
 
 
