@@ -119,22 +119,11 @@ def prepareData(filename):
     training_set = np.delete(training_set, -1, 1)
     test_set = np.delete(test_set, -1, 1)
 
-    #training_set = normalize_dataset(training_set)
-    #test_set=normalize_dataset(test_set)
-
-
     scaler = StandardScaler()
-
-
     scaler.fit(training_set)
-
 
     training_set = scaler.transform(training_set)
     test_set = scaler.transform(test_set)
 
-
-    #Normalizacja danych
-
-
-    return (training_set, training_set_Y),(test_set, test_set_Y)
+    return (training_set, training_set_Y), (test_set, test_set_Y)
 
