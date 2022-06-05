@@ -1,4 +1,5 @@
 import os.path
+import time
 
 import keras.models
 from keras import Sequential
@@ -40,9 +41,9 @@ class DenseNN:
             metrics=['accuracy']
         )
 
-    def train_model(self):
-        es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=1000, restore_best_weights=True)
-        self.history = self.model.fit(self.X_train, self.Y_train, validation_split=0.2, batch_size=32, epochs=10000, callbacks=es, verbose=1)
+    def train_model(self,verbose=0):
+        es = EarlyStopping(monitor='val_loss', mode='min', verbose=verbose, patience=1000, restore_best_weights=True)
+        self.history = self.model.fit(self.X_train, self.Y_train, validation_split=0.2, batch_size=32, epochs=10000, callbacks=es, verbose=verbose)
         np.save('Models/history/denseNN_history.npy', self.history)
         self.model.save("Models/denseNN")
 
@@ -52,10 +53,8 @@ class DenseNN:
 
         self.scores = self.model.evaluate(self.X_test, self.Y_test, verbose=0)
 
-    def get_results(self):
-        print(f"Scores on test set:")
-        print(f"loss: {self.scores[0]}")
-        print(f"accuracy: {self.scores[1]}")
+    def get_results(self, verbose=1):
+        plt.clf()
         plt.plot(self.history.history["loss"], label="Loss")
         plt.plot(self.history.history['val_loss'], label="Validation loss")
         plt.plot(self.history.history['accuracy'], label="Accuracy")
@@ -65,7 +64,38 @@ class DenseNN:
         plt.title("Własności modelu")
         plt.xlabel("Epoki")
         plt.ylabel("Wartość")
-        plt.show()
-        plt.savefig("model.png")
+        curr_time = time.time()
+        plt.savefig(f'Plots/model_{curr_time}.png')
+        if verbose == 1:
+            plt.show()
 
         return self.scores[0], self.scores[1]
+
+    def single_run(self, verbose=1):
+        start = time.time()
+        self.import_data('arrhythmia.data')
+        self.construct_model()
+        self.train_model(verbose)
+        self.test_model()
+        loss, acc = self.get_results(verbose)
+        stop = time.time()
+        if verbose == 1:
+            print("Scores on test set:")
+            print(f"Time: {(stop-start):.2f} s")
+            print(f"Loss: {loss:.2f}")
+            print(f"Accuracy: {(acc*100):.2f} %")
+
+        return loss, acc, stop-start
+
+    def multiple_runs(self, runs, verbose=0):
+        avg_loss = []
+        avg_acc = []
+        for i in range(runs):
+            loss, acc, run_time = self.single_run(verbose)
+            avg_loss.append(loss)
+            avg_acc.append(acc)
+            print(f"Run {i+1} finished ({run_time:.2f} s, accuracy: {(acc*100):.2f} %) - {runs-i-1} remaining.")
+
+        print(f"Average results of {runs} runs:")
+        print(f"Loss: {(sum(avg_loss)/len(avg_loss)):.2f}")
+        print(f"Accuracy: {(sum(avg_acc)/len(avg_acc) * 100):.2f}%")

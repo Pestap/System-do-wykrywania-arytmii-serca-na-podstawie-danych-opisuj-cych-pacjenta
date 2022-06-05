@@ -1,17 +1,10 @@
 from DenseNN import DenseNN
+from DecisionTree import DecisionTree
+
 nn_model = DenseNN()
+decision_tree = DecisionTree()
+decision_tree.single_run()
 
-losses = []
-accs = []
 
-for i in range(10):
-    nn_model.import_data('arrhythmia.data')
-    nn_model.construct_model()
-    nn_model.train_model()
-    nn_model.test_model()
-    loss, acc = nn_model.get_results()
-    losses.append(loss)
-    accs.append(acc)
-
-print(sum(losses)/len(losses))
-print(sum(accs)/len(accs))
+#nn_model.multiple_runs(1)
+#nn_model.single_run()
