@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 from sklearn.preprocessing import StandardScaler
-
+#TODO: Feature names
 def importData(filename):
     #import z pliku z danymi z folderu Data
     df = pd.read_csv("Data/" + filename, header=None)
@@ -48,7 +48,7 @@ def normalize_dataset(dataset):
 
     return normalization_result
 
-def prepareData(filename):
+def prepareData(filename, standardize=True):
     df = importData(filename)
 
     dataset = df.to_numpy()
@@ -118,12 +118,12 @@ def prepareData(filename):
 
     training_set = np.delete(training_set, -1, 1)
     test_set = np.delete(test_set, -1, 1)
+    if standardize:
+        scaler = StandardScaler()
+        scaler.fit(training_set)
 
-    scaler = StandardScaler()
-    scaler.fit(training_set)
-
-    training_set = scaler.transform(training_set)
-    test_set = scaler.transform(test_set)
+        training_set = scaler.transform(training_set)
+        test_set = scaler.transform(test_set)
 
     return (training_set, training_set_Y), (test_set, test_set_Y)
 
