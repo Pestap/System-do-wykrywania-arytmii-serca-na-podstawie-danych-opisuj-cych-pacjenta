@@ -2,11 +2,21 @@ import pandas as pd
 import numpy as np
 
 from sklearn.preprocessing import StandardScaler
-#TODO: Feature names
+
+
 def importData(filename):
     #import z pliku z danymi z folderu Data
     df = pd.read_csv("Data/" + filename, header=None)
     return df
+
+
+def read_labels(filename):
+    labels = []
+    file = open(f"Data/{filename}", "r")
+    for line in file:
+        labels.append(line[:-1])
+    return labels
+
 
 def column_average(dataset, column_index):
     column = dataset[:, column_index]
@@ -50,7 +60,7 @@ def normalize_dataset(dataset):
 
 def prepareData(filename, standardize=True):
     df = importData(filename)
-
+    labels = read_labels('att_names.txt')
     dataset = df.to_numpy()
     #usuwamy 13 kolumne - większość rekordów nie posiada wartości
     cols_to_delete = [13]
@@ -74,7 +84,7 @@ def prepareData(filename, standardize=True):
 
 
     dataset = np.delete(dataset, cols_to_delete, 1)
-
+    labels = np.delete(labels, cols_to_delete)
     #usuwamy rekordy nieposiadjace plenych atrybutow
     #rows_to_delete = []
 
@@ -125,5 +135,5 @@ def prepareData(filename, standardize=True):
         training_set = scaler.transform(training_set)
         test_set = scaler.transform(test_set)
 
-    return (training_set, training_set_Y), (test_set, test_set_Y)
+    return (training_set, training_set_Y), (test_set, test_set_Y), labels
 

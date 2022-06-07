@@ -5,11 +5,12 @@ import keras.models
 from keras import Sequential
 from keras.callbacks import EarlyStopping
 from keras.layers import Dense, Dropout
+from sklearn import metrics
 from tensorflow import keras
 
 import matplotlib.pyplot as plt
 import numpy as np
-from importAndPrepareData import prepareData
+from import_and_prepare_data import prepareData
 
 
 class DenseNN:
@@ -20,10 +21,11 @@ class DenseNN:
         self.X_test = None
         self.Y_test = None
         self.model = None
+        self.predictions = None
 
     def import_data(self, filename):
         if os.path.exists("Data/"+filename):
-            (self.X_train, self.Y_train), (self.X_test, self.Y_test) = prepareData(filename)
+            (self.X_train, self.Y_train), (self.X_test, self.Y_test), _ = prepareData(filename)
         else:
             raise Exception("No data file found")
 
@@ -52,9 +54,14 @@ class DenseNN:
             self.model = keras.models.load_model('Models/denseNN')
 
         self.scores = self.model.evaluate(self.X_test, self.Y_test, verbose=0)
+        self.predictions = self.model.predict(self.X_test)
+        self.predictions = list(map(lambda x: 0 if x<0.5 else 1, self.predictions))
 
     def get_results(self, verbose=1):
+
+        # TODO: get all resutlts: accuracy, loss, precision etc.
         plt.clf()
+        plt.cla()
         plt.plot(self.history.history["loss"], label="Loss")
         plt.plot(self.history.history['val_loss'], label="Validation loss")
         plt.plot(self.history.history['accuracy'], label="Accuracy")
@@ -69,7 +76,7 @@ class DenseNN:
         if verbose == 1:
             plt.show()
 
-        return self.scores[0], self.scores[1]
+        return self.scores[0], self.scores[1], metrics.precision_score(self.Y_test, self.predictions), metrics.recall_score(self.Y_test, self.predictions)
 
     def single_run(self, verbose=1):
         start = time.time()
@@ -77,25 +84,32 @@ class DenseNN:
         self.construct_model()
         self.train_model(verbose)
         self.test_model()
-        loss, acc = self.get_results(verbose)
+        loss, acc, precision, recall = self.get_results(verbose)
         stop = time.time()
         if verbose == 1:
             print("Scores on test set:")
             print(f"Time: {(stop-start):.2f} s")
             print(f"Loss: {loss:.2f}")
             print(f"Accuracy: {(acc*100):.2f} %")
-
-        return loss, acc, stop-start
+            print(f"Precision: {(precision * 100):.2f} %")
+            print(f"Recall: {(recall * 100):.2f} %")
+        return loss, acc,precision,recall, stop-start
 
     def multiple_runs(self, runs, verbose=0):
         avg_loss = []
         avg_acc = []
+        avg_precision = []
+        avg_recall = []
         for i in range(runs):
-            loss, acc, run_time = self.single_run(verbose)
+            loss, acc,precision, recall, run_time = self.single_run(verbose)
             avg_loss.append(loss)
             avg_acc.append(acc)
-            print(f"Run {i+1} finished ({run_time:.2f} s, accuracy: {(acc*100):.2f} %) - {runs-i-1} remaining.")
+            avg_precision.append(precision)
+            avg_recall.append(recall)
+            print(f"Run {i+1} finished ({run_time:.2f} s, accuracy: {(acc*100):.2f} %, precision: {(precision*100):.2f} %, recall {(recall*100):.2f} %) - {runs-i-1} remaining.")
 
         print(f"Average results of {runs} runs:")
         print(f"Loss: {(sum(avg_loss)/len(avg_loss)):.2f}")
         print(f"Accuracy: {(sum(avg_acc)/len(avg_acc) * 100):.2f}%")
+        print(f"Precision: {(sum(avg_precision)/len(avg_precision) * 100):.2f}%")
+        print(f"Recall: {(sum(avg_recall) / len(avg_recall) * 100):.2f}%")
