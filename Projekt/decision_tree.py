@@ -66,10 +66,12 @@ class DecisionTree:
 
     def print_result(self):
         print(f'Results for decision tree with depth of {self.depth}')
-        print(f'Accuracy: {self.accuracy:.2f} %')
-        print(f'Precision: {self.precision:.2f} %')
-        print(f'Recall: {self.recall:.2f} %')
+        print(f'Accuracy: {self.accuracy*100:.2f} %')
+        print(f'Precision: {self.precision*100:.2f} %')
+        print(f'Recall: {self.recall*100:.2f} %')
 
+    def get_results(self):
+        return self.accuracy, self.precision, self.recall
     def plot_result(self):
         tree.plot_tree(self.model, filled=True, rounded=True, feature_names=self.labels, class_names=self.classes,
                        fontsize=8, proportion=True)

@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 
 class DecisionForest:
-    def __init__(self, trees=50):
+    def __init__(self, trees=50, depth=None):
         self.X_train = None
         self.Y_train = None
         self.X_test = None
@@ -25,6 +25,7 @@ class DecisionForest:
         self.accuracy = 0
         self.precision = 0
         self.recall = 0
+        self.max_depth = depth
 
     def import_data(self, filename):
         if os.path.exists("Data/"+filename):
@@ -33,7 +34,7 @@ class DecisionForest:
             raise Exception("No data file found")
 
     def construct_model(self):
-        self.model = RandomForestClassifier(n_estimators=self.number_of_trees)
+        self.model = RandomForestClassifier(n_estimators=self.number_of_trees,max_depth=self.max_depth)
 
     def train_model(self):
         self.model.fit(self.X_train, self.Y_train)
@@ -68,9 +69,12 @@ class DecisionForest:
 
     def print_result(self):
         print(f'Results for decision forest with {self.number_of_trees} trees:')
-        print(f'Accuracy: {self.accuracy:.2f} %')
-        print(f'Precision: {self.precision:.2f} %')
-        print(f'Recall: {self.recall:.2f} %')
+        print(f'Accuracy: {self.accuracy*100:.2f} %')
+        print(f'Precision: {self.precision*100:.2f} %')
+        print(f'Recall: {self.recall*100:.2f} %')
+
+    def get_results(self):
+        return self.accuracy, self.precision, self.recall
 
     def plot_result(self):
         sns.barplot(x=pd.Series(self.model.feature_importances_, index=self.labels).sort_values(ascending=False), y=self.labels)

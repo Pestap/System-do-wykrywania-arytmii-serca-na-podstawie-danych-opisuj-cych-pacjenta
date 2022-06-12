@@ -62,17 +62,28 @@ class DenseNN:
         # TODO: get all resutlts: accuracy, loss, precision etc.
         plt.clf()
         plt.cla()
-        plt.plot(self.history.history["loss"], label="Loss")
-        plt.plot(self.history.history['val_loss'], label="Validation loss")
+
         plt.plot(self.history.history['accuracy'], label="Accuracy")
         plt.plot(self.history.history['val_accuracy'], label="Validation accuracy")
         plt.legend()
         plt.grid()
         plt.title("Własności modelu")
         plt.xlabel("Epoki")
-        plt.ylabel("Wartość")
+        plt.ylabel("Celność")
         curr_time = time.time()
-        plt.savefig(f'Plots/model_{curr_time}.png')
+        plt.savefig(f'Plots/model_{curr_time}_acc.png')
+
+        plt.clf()
+        plt.cla()
+        plt.plot(self.history.history["loss"], label="Loss")
+        plt.plot(self.history.history['val_loss'], label="Validation loss")
+        plt.legend()
+        plt.grid()
+        plt.title("Własności modelu")
+        plt.xlabel("Epoki")
+        plt.ylabel("Wartość funkcji loss")
+        plt.savefig(f'Plots/model_{curr_time}_loss.png')
+
         if verbose == 1:
             plt.show()
 
